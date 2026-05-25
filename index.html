@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>さくら食堂 | Sakura Restaurant</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- Floating Cherry Blossoms -->
+<div class="petals-container" aria-hidden="true">
+  <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+  <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+  <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+  <div class="petal"></div>
+</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo">
+      <span class="logo-jp">さくら食堂</span>
+      <span class="logo-sub">Sakura Shokudō</span>
+    </div>
+  </div>
+  <div class="header-center">
+    <div class="table-selector">
+      <label class="table-label">ໂຕ໊ະ / テーブル</label>
+      <div class="table-btns" id="tableBtns">
+        <button class="table-btn active" data-table="1">1</button>
+        <button class="table-btn" data-table="2">2</button>
+        <button class="table-btn" data-table="3">3</button>
+        <button class="table-btn" data-table="4">4</button>
+        <button class="table-btn" data-table="5">5</button>
+        <button class="table-btn" data-table="6">6</button>
+        <button class="table-btn" data-table="7">7</button>
+        <button class="table-btn" data-table="8">8</button>
+        <button class="table-btn" data-table="9">9</button>
+        <button class="table-btn" data-table="10">10</button>
+        <button class="table-btn delivery">🛵</button>
+      </div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="cart-summary" id="cartSummary">
+      <div class="cart-icon-wrap">
+        <span class="cart-icon">🧺</span>
+        <span class="cart-badge" id="cartBadge">0</span>
+      </div>
+      <div class="cart-total-mini">
+        <span class="cart-label">ລວມ</span>
+        <span class="cart-total-val" id="cartTotalMini">0 ₭</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- CATEGORY TABS -->
+<nav class="category-nav">
+  <button class="cat-btn active" data-cat="all">✦ ທັງໝົດ</button>
+  <button class="cat-btn" data-cat="sushi">🍣 Sushi-Sashimi</button>
+  <button class="cat-btn" data-cat="noodle">🍜 Noodle</button>
+  <button class="cat-btn" data-cat="steak">🥩 Steak</button>
+  <button class="cat-btn" data-cat="rice">🍱 Rice</button>
+  <button class="cat-btn" data-cat="salad">🥗 Salad</button>
+  <button class="cat-btn" data-cat="fried">🍤 Fried &amp; Snack</button>
+  <button class="cat-btn" data-cat="icecream">🍨 Ice Cream</button>
+  <button class="cat-btn" data-cat="drink">🍵 Drink</button>
+</nav>
+
+<!-- MAIN LAYOUT -->
+<main class="main-layout">
+
+  <!-- MENU GRID -->
+  <section class="menu-section">
+    <div class="menu-grid" id="menuGrid"></div>
+  </section>
+
+  <!-- CART PANEL -->
+  <aside class="cart-panel" id="cartPanel">
+    <div class="cart-header">
+      <h2 class="cart-title">ລາຍການອາຫານ <span class="jp-sub">メニュー</span></h2>
+      <div class="order-type-toggle">
+        <button class="ot-btn active" id="btnDineIn" onclick="setOrderType('dine-in')">🏮 ກິນຢູ່ຮ້ານ</button>
+        <button class="ot-btn" id="btnDelivery" onclick="setOrderType('delivery')">🛵 ສົ່ງເຮືອນ</button>
+      </div>
+    </div>
+
+    <!-- Customer Info -->
+    <div class="customer-info" id="customerInfo">
+      <div class="info-row">
+        <input type="text" id="customerName" class="info-input" placeholder="ຊື່ລູກຄ້າ / お客様名" />
+      </div>
+      <div class="info-row">
+        <input type="tel" id="customerPhone" class="info-input" placeholder="ເບີໂທ / 電話番号" />
+      </div>
+      <div class="info-row delivery-only hidden" id="addressRow">
+        <input type="text" id="deliveryAddress" class="info-input" placeholder="ທີ່ຢູ່ສົ່ງ / 配達先住所" />
+      </div>
+    </div>
+
+    <!-- Cart Items -->
+    <div class="cart-items" id="cartItems">
+      <div class="cart-empty" id="cartEmpty">
+        <span class="empty-icon">🌸</span>
+        <p>ຍັງບໍ່ທັນເລືອກເມນູ</p>
+        <p class="empty-sub">まだ選択されていません</p>
+      </div>
+    </div>
+
+    <!-- Discount -->
+    <div class="discount-row">
+      <input type="text" id="discountCode" class="discount-input" placeholder="ລະຫັດສ່ວນລົດ / クーポンコード" />
+      <button class="apply-btn" onclick="applyDiscount()">ໃຊ້</button>
+    </div>
+    <div class="discount-msg" id="discountMsg"></div>
+
+    <!-- Totals -->
+    <div class="cart-totals">
+      <div class="total-row">
+        <span>ລວມກ່ອນສ່ວນລົດ</span>
+        <span id="subtotalVal">0 ₭</span>
+      </div>
+      <div class="total-row discount-row-display hidden" id="discountDisplay">
+        <span class="discount-text">ສ່ວນລົດ 5%</span>
+        <span class="discount-amt" id="discountAmt">-0 ₭</span>
+      </div>
+      <div class="total-row delivery-only hidden" id="deliveryFeeRow">
+        <span>ຄ່າສົ່ງ</span>
+        <span id="deliveryFeeVal">15,000 ₭</span>
+      </div>
+      <div class="total-row grand">
+        <span>ຍອດລວມ 合計</span>
+        <span id="grandTotalVal">0 ₭</span>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="cart-actions">
+      <button class="btn-clear" onclick="clearCart()">🗑 ລ້າງລາຍການທັງໝົດ</button>
+      <button class="btn-checkout" onclick="checkout()">🧾 ອອກໃບບິນ</button>
+    </div>
+  </aside>
+</main>
+
+<!-- CART MOBILE TOGGLE -->
+<button class="mobile-cart-fab" id="mobileCartFab" onclick="toggleMobileCart()">
+  🧺 <span id="fabBadge">0</span>
+</button>
+
+<script src="script.js"></script>
+</body>
+</html>

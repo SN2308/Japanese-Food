@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome | さくら食堂</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sakura:      #e8a0b0;
+      --sakura-deep: #c9607a;
+      --gold:        #c8a84b;
+      --gold-light:  #f0d98a;
+      --ink:         #1a0f14;
+      --cream:       #fdf6f0;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      font-family: 'Noto Sans Lao', sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── SKY / BACKGROUND ── */
+    body {
+      background: #0d0610;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* Starfield */
+    .stars {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 40% 8%, rgba(255,255,255,0.8) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 18%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 82% 5%, rgba(255,255,255,0.9) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 35%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 15% 65%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 72%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 60% 60%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 78% 75%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 92% 55%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 5% 88%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 47% 90%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 95% 80%, rgba(255,255,255,0.7) 0%, transparent 100%);
+    }
+
+    /* Deep purple-to-indigo night sky gradient */
+    .sky-gradient {
+      position: fixed; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse 120% 80% at 50% 100%, #2d0a20 0%, #160a28 40%, #0d0610 100%);
+    }
+
+    /* Moon */
+    .moon {
+      position: fixed;
+      top: 6vh; right: 8vw;
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fff8e8, #f5e090 50%, #c8a040);
+      box-shadow:
+        0 0 40px 14px rgba(248,224,100,0.18),
+        0 0 100px 30px rgba(200,160,64,0.10);
+      z-index: 1;
+      animation: moonGlow 4s ease-in-out infinite;
+    }
+    @keyframes moonGlow {
+      0%, 100% { box-shadow: 0 0 40px 14px rgba(248,224,100,0.18), 0 0 100px 30px rgba(200,160,64,0.10); }
+      50%       { box-shadow: 0 0 60px 22px rgba(248,224,100,0.26), 0 0 130px 50px rgba(200,160,64,0.16); }
+    }
+
+    /* ── LANTERNS ── */
+    .lanterns {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 2;
+      display: flex; justify-content: space-around;
+      padding: 0 40px;
+    }
+    .lantern-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      animation: lanternSway 3.5s ease-in-out infinite;
+    }
+    .lantern-wrap:nth-child(2) { animation-delay: 0.6s; animation-duration: 4.1s; }
+    .lantern-wrap:nth-child(3) { animation-delay: 1.2s; animation-duration: 3.8s; }
+    .lantern-wrap:nth-child(4) { animation-delay: 0.3s; animation-duration: 4.4s; }
+    .lantern-wrap:nth-child(5) { animation-delay: 0.9s; animation-duration: 3.6s; }
+    @keyframes lanternSway {
+      0%, 100% { transform: rotate(-4deg); }
+      50%       { transform: rotate(4deg); }
+    }
+    .lantern-string {
+      width: 1px; height: 60px;
+      background: linear-gradient(to bottom, rgba(200,168,75,0.5), rgba(200,168,75,0.15));
+    }
+    .lantern-body {
+      width: 38px; height: 56px;
+      background: radial-gradient(ellipse at 50% 30%, #ff9060, #e03a20 60%, #8a1a08);
+      border-radius: 45% 45% 50% 50%;
+      position: relative;
+      box-shadow: 0 0 18px 6px rgba(255,100,40,0.4), 0 0 40px 12px rgba(220,80,20,0.2);
+      overflow: hidden;
+    }
+    .lantern-body::before {
+      content: '';
+      position: absolute; inset: 4px;
+      border-radius: inherit;
+      background: radial-gradient(ellipse at 40% 30%, rgba(255,220,160,0.45), transparent 70%);
+    }
+    .lantern-body::after {
+      content: '祭';
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; color: rgba(255,230,180,0.7);
+      letter-spacing: 0;
+      line-height: 1;
+      padding-top: 4px;
+    }
+    .lantern-body.l2::after { content: '桜'; }
+    .lantern-body.l3::after { content: '食'; }
+    .lantern-body.l4::after { content: '堂'; }
+    .lantern-body.l5::after { content: '酒'; }
+    .lantern-cap {
+      width: 44px; height: 8px;
+      background: linear-gradient(to right, #8a5a10, #c8a040, #8a5a10);
+      border-radius: 4px 4px 0 0;
+      margin-bottom: -2px;
+    }
+    .lantern-base {
+      width: 44px; height: 8px;
+      background: linear-gradient(to right, #8a5a10, #c8a040, #8a5a10);
+      border-radius: 0 0 4px 4px;
+      margin-top: -2px;
+    }
+    .lantern-tassel {
+      width: 2px; height: 20px;
+      background: linear-gradient(to bottom, #c8a040, rgba(200,160,64,0));
+    }
+
+    /* ── TORII GATE ── */
+    .torii {
+      position: fixed;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .torii svg { display: block; }
+
+    /* ── PAGODA SILHOUETTE ── */
+    .pagoda {
+      position: fixed;
+      bottom: 0; left: 5vw;
+      z-index: 1;
+      opacity: 0.45;
+    }
+
+    /* ── SAKURA TREE SILHOUETTES ── */
+    .tree-left, .tree-right {
+      position: fixed; bottom: 0; z-index: 3;
+      pointer-events: none;
+    }
+    .tree-left  { left: -20px; }
+    .tree-right { right: -20px; transform: scaleX(-1); }
+
+    /* ── FALLING PETALS ── */
+    .petals-layer {
+      position: fixed; inset: 0; z-index: 4; pointer-events: none; overflow: hidden;
+    }
+    .fp {
+      position: absolute;
+      top: -30px;
+      border-radius: 80% 20% 80% 20%;
+      animation: fpFall linear infinite;
+    }
+    @keyframes fpFall {
+      0%   { opacity: 0; transform: translateY(0) rotate(0deg) translateX(0); }
+      8%   { opacity: 0.8; }
+      90%  { opacity: 0.5; }
+      100% { opacity: 0; transform: translateY(105vh) rotate(400deg) translateX(60px); }
+    }
+
+    /* ── GROUND / REFLECTION ── */
+    .ground {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 120px; z-index: 2;
+      background: linear-gradient(to top, rgba(180,40,60,0.08) 0%, transparent 100%);
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      position: relative; z-index: 10;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center;
+      padding: 20px;
+      animation: fadeInUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: 0.4s;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Ornamental top line */
+    .deco-line {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+    }
+    .deco-line::before, .deco-line::after {
+      content: '';
+      width: 60px; height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold));
+    }
+    .deco-line::after {
+      background: linear-gradient(to left, transparent, var(--gold));
+    }
+    .deco-kanji {
+      font-size: 0.7rem; color: var(--gold); letter-spacing: 4px;
+      font-weight: 300;
+    }
+
+    /* Japanese title block */
+    .jp-title-block {
+      margin-bottom: 16px;
+    }
+    .jp-main {
+      font-size: clamp(3.5rem, 10vw, 6.5rem);
+      font-weight: 800;
+      color: var(--sakura);
+      letter-spacing: 10px;
+      line-height: 1;
+      text-shadow:
+        0 0 40px rgba(232,160,176,0.5),
+        0 0 80px rgba(201,96,122,0.3);
+      animation: titlePulse 3s ease-in-out infinite;
+    }
+    @keyframes titlePulse {
+      0%, 100% { text-shadow: 0 0 40px rgba(232,160,176,0.5), 0 0 80px rgba(201,96,122,0.3); }
+      50%       { text-shadow: 0 0 60px rgba(232,160,176,0.7), 0 0 120px rgba(201,96,122,0.5); }
+    }
+    .jp-sub-title {
+      font-size: clamp(0.65rem, 2vw, 0.82rem);
+      font-weight: 300; letter-spacing: 8px;
+      color: var(--gold-light); margin-top: 6px;
+      text-transform: uppercase;
+    }
+
+    /* Divider */
+    .center-divider {
+      display: flex; align-items: center; gap: 16px;
+      margin: 18px 0;
+    }
+    .center-divider .line {
+      width: 80px; height: 1px;
+      background: linear-gradient(to right, transparent, rgba(232,160,176,0.4));
+    }
+    .center-divider .line.r {
+      background: linear-gradient(to left, transparent, rgba(232,160,176,0.4));
+    }
+    .center-divider .diamond {
+      width: 8px; height: 8px;
+      background: var(--sakura-deep);
+      transform: rotate(45deg);
+      box-shadow: 0 0 10px rgba(201,96,122,0.6);
+    }
+
+    /* Welcome text */
+    .welcome-block { margin-bottom: 10px; }
+    .welcome-en {
+      font-size: clamp(1.6rem, 5vw, 2.8rem);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 4px;
+      line-height: 1.15;
+    }
+    .welcome-en span {
+      color: var(--sakura);
+      text-shadow: 0 0 30px rgba(232,160,176,0.5);
+    }
+    .welcome-sub {
+      font-size: clamp(0.7rem, 2vw, 0.85rem);
+      font-weight: 300;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 3px;
+      margin-top: 8px;
+      text-transform: uppercase;
+    }
+
+    /* Features pills */
+    .features {
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: center;
+      margin: 22px 0 30px;
+    }
+    .feat-pill {
+      padding: 6px 16px;
+      border: 1px solid rgba(232,160,176,0.25);
+      border-radius: 999px;
+      font-size: 0.72rem; font-weight: 500;
+      color: rgba(255,255,255,0.65);
+      background: rgba(255,255,255,0.04);
+      letter-spacing: 0.5px;
+      backdrop-filter: blur(6px);
+    }
+
+    /* CTA Button */
+    .cta-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .btn-enter {
+      position: relative;
+      padding: 18px 60px;
+      background: transparent;
+      border: 2px solid var(--sakura-deep);
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Noto Sans Lao', sans-serif;
+      font-size: clamp(0.85rem, 2.5vw, 1rem);
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-enter::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--sakura-deep), #8a2040);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: -1;
+    }
+    .btn-enter:hover { box-shadow: 0 0 30px rgba(201,96,122,0.5), 0 0 60px rgba(201,96,122,0.2); }
+    .btn-enter:hover::before { transform: scaleX(1); }
+    .btn-enter-sub {
+      font-size: 0.65rem; color: rgba(255,255,255,0.3);
+      letter-spacing: 3px; text-transform: uppercase;
+    }
+
+    /* Bottom ornament */
+    .bottom-deco {
+      margin-top: 28px;
+      font-size: 0.65rem; color: rgba(200,168,75,0.4);
+      letter-spacing: 6px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .lantern-wrap:nth-child(4),
+      .lantern-wrap:nth-child(5) { display: none; }
+      .pagoda { display: none; }
+      .jp-main { letter-spacing: 6px; }
+      .btn-enter { padding: 16px 40px; }
+    }
+    @media (max-height: 600px) {
+      .lanterns { display: none; }
+      .content { padding: 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sky layers -->
+<div class="sky-gradient"></div>
+<div class="stars"></div>
+
+<!-- Moon -->
+<div class="moon"></div>
+
+<!-- Lanterns -->
+<div class="lanterns">
+  <div class="lantern-wrap">
+    <div class="lantern-string"></div>
+    <div class="lantern-cap"></div>
+    <div class="lantern-body"></div>
+    <div class="lantern-base"></div>
+    <div class="lantern-tassel"></div>
+  </div>
+  <div class="lantern-wrap">
+    <div class="lantern-string"></div>
+    <div class="lantern-cap"></div>
+    <div class="lantern-body l2"></div>
+    <div class="lantern-base"></div>
+    <div class="lantern-tassel"></div>
+  </div>
+  <div class="lantern-wrap">
+    <div class="lantern-string"></div>
+    <div class="lantern-cap"></div>
+    <div class="lantern-body l3"></div>
+    <div class="lantern-base"></div>
+    <div class="lantern-tassel"></div>
+  </div>
+  <div class="lantern-wrap">
+    <div class="lantern-string"></div>
+    <div class="lantern-cap"></div>
+    <div class="lantern-body l4"></div>
+    <div class="lantern-base"></div>
+    <div class="lantern-tassel"></div>
+  </div>
+  <div class="lantern-wrap">
+    <div class="lantern-string"></div>
+    <div class="lantern-cap"></div>
+    <div class="lantern-body l5"></div>
+    <div class="lantern-base"></div>
+    <div class="lantern-tassel"></div>
+  </div>
+</div>
+
+<!-- Torii Gate -->
+<div class="torii">
+  <svg width="340" height="200" viewBox="0 0 340 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Main top beam (kasagi) -->
+    <rect x="10" y="40" width="320" height="16" rx="3" fill="#9b2020" opacity="0.85"/>
+    <!-- Curved tips -->
+    <path d="M10 40 Q0 34 8 28 L20 34 Q12 36 10 40Z" fill="#9b2020" opacity="0.85"/>
+    <path d="M330 40 Q340 34 332 28 L320 34 Q328 36 330 40Z" fill="#9b2020" opacity="0.85"/>
+    <!-- Second beam (nuki) -->
+    <rect x="50" y="70" width="240" height="10" rx="2" fill="#b52828" opacity="0.75"/>
+    <!-- Left pillar -->
+    <rect x="62" y="75" width="22" height="125" rx="3" fill="#9b2020" opacity="0.8"/>
+    <!-- Right pillar -->
+    <rect x="256" y="75" width="22" height="125" rx="3" fill="#9b2020" opacity="0.8"/>
+    <!-- Shimagi (top crossbar extra) -->
+    <rect x="30" y="34" width="280" height="8" rx="2" fill="#c83030" opacity="0.6"/>
+    <!-- Glow under beams -->
+    <rect x="10" y="54" width="320" height="4" rx="2" fill="rgba(255,120,80,0.15)"/>
+  </svg>
+</div>
+
+<!-- Pagoda silhouette -->
+<div class="pagoda">
+  <svg width="120" height="260" viewBox="0 0 120 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="52" y="240" width="16" height="20" fill="#1a0810"/>
+    <!-- Floors -->
+    <rect x="40" y="210" width="40" height="32" fill="#1a0810"/>
+    <path d="M28 210 L60 190 L92 210Z" fill="#1a0810"/>
+    <rect x="34" y="175" width="52" height="4" fill="#1a0810"/>
+
+    <rect x="44" y="148" width="32" height="30" fill="#1a0810"/>
+    <path d="M32 148 L60 130 L88 148Z" fill="#1a0810"/>
+    <rect x="36" y="114" width="48" height="4" fill="#1a0810"/>
+
+    <rect x="48" y="92" width="24" height="24" fill="#1a0810"/>
+    <path d="M36 92 L60 72 L84 92Z" fill="#1a0810"/>
+    <rect x="38" y="58" width="44" height="4" fill="#1a0810"/>
+
+    <rect x="52" y="38" width="16" height="22" fill="#1a0810"/>
+    <path d="M42 38 L60 18 L78 38Z" fill="#1a0810"/>
+    <rect x="56" y="4" width="8" height="16" fill="#1a0810"/>
+    <circle cx="60" cy="4" r="4" fill="#1a0810"/>
+  </svg>
+</div>
+
+<!-- Sakura Trees -->
+<div class="tree-left">
+  <svg width="200" height="420" viewBox="0 0 200 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Trunk -->
+    <path d="M90 420 Q80 360 85 300 Q88 260 80 220 Q75 190 82 160" stroke="#2d1010" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="M90 420 Q100 370 95 320" stroke="#3a1515" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <!-- Major branches -->
+    <path d="M82 300 Q50 280 20 260" stroke="#2d1010" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M84 260 Q110 240 140 220" stroke="#2d1010" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M81 200 Q60 170 30 150" stroke="#2d1010" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M82 180 Q100 155 120 135" stroke="#2d1010" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <!-- Blossom clusters -->
+    <circle cx="18"  cy="252" r="36" fill="rgba(220,130,160,0.55)"/>
+    <circle cx="42"  cy="238" r="28" fill="rgba(240,160,180,0.45)"/>
+    <circle cx="145" cy="212" r="32" fill="rgba(220,130,160,0.5)"/>
+    <circle cx="120" cy="200" r="26" fill="rgba(240,160,180,0.4)"/>
+    <circle cx="28"  cy="142" r="34" fill="rgba(220,130,160,0.5)"/>
+    <circle cx="55"  cy="130" r="26" fill="rgba(240,160,180,0.42)"/>
+    <circle cx="125" cy="128" r="30" fill="rgba(220,130,160,0.48)"/>
+    <circle cx="100" cy="115" r="22" fill="rgba(240,160,180,0.38)"/>
+  </svg>
+</div>
+
+<div class="tree-right">
+  <svg width="200" height="420" viewBox="0 0 200 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M90 420 Q80 360 85 300 Q88 260 80 220 Q75 190 82 160" stroke="#2d1010" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="M90 420 Q100 370 95 320" stroke="#3a1515" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M82 300 Q50 280 20 260" stroke="#2d1010" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M84 260 Q110 240 140 220" stroke="#2d1010" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M81 200 Q60 170 30 150" stroke="#2d1010" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M82 180 Q100 155 120 135" stroke="#2d1010" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <circle cx="18"  cy="252" r="36" fill="rgba(220,130,160,0.55)"/>
+    <circle cx="42"  cy="238" r="28" fill="rgba(240,160,180,0.45)"/>
+    <circle cx="145" cy="212" r="32" fill="rgba(220,130,160,0.5)"/>
+    <circle cx="120" cy="200" r="26" fill="rgba(240,160,180,0.4)"/>
+    <circle cx="28"  cy="142" r="34" fill="rgba(220,130,160,0.5)"/>
+    <circle cx="55"  cy="130" r="26" fill="rgba(240,160,180,0.42)"/>
+    <circle cx="125" cy="128" r="30" fill="rgba(220,130,160,0.48)"/>
+    <circle cx="100" cy="115" r="22" fill="rgba(240,160,180,0.38)"/>
+  </svg>
+</div>
+
+<!-- Falling petals layer -->
+<div class="petals-layer" id="petalsLayer"></div>
+
+<!-- Ground glow -->
+<div class="ground"></div>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="content">
+
+  <div class="deco-line">
+    <span class="deco-kanji">ようこそ ✦ ようこそ</span>
+  </div>
+
+  <div class="jp-title-block">
+    <div class="jp-main">さくら食堂</div>
+    <div class="jp-sub-title">Sakura Shokudō — Est. 2024</div>
+  </div>
+
+  <div class="center-divider">
+    <div class="line"></div>
+    <div class="diamond"></div>
+    <div class="line r"></div>
+  </div>
+
+  <div class="welcome-block">
+    <div class="welcome-en">Welcome to <span>Japanese Food</span></div>
+    <div class="welcome-sub">ຍິນດີຕ້ອນຮັບສູ່ຮ້ານອາຫານຍີ່ປຸ່ນ</div>
+  </div>
+
+  <div class="features">
+    <div class="feat-pill">🍣 ຊູຊິ &amp; ຊາຊິມິ</div>
+    <div class="feat-pill">🍜 ລາເມັນ Tonkotsu</div>
+    <div class="feat-pill">🥩 Wagyu Steak</div>
+    <div class="feat-pill">🥟 Gyoza</div>
+    <div class="feat-pill">🍵 Matcha &amp; ເຄື່ອງດື່ມ</div>
+    <div class="feat-pill">🛵 Delivery ສົ່ງເຮືອນ</div>
+  </div>
+
+  <div class="cta-wrap">
+    <a href="index.html" class="btn-enter">✦ ເຂົ້າສູ່ຮ້ານ / Enter</a>
+    <div class="btn-enter-sub">ກົດເພື່ອສັ່ງອາຫານ • Click to order</div>
+  </div>
+
+  <div class="bottom-deco">✦ ✿ 桜 ✿ ✦</div>
+
+</div>
+
+<script>
+  // Generate falling petals
+  (function() {
+    const layer = document.getElementById('petalsLayer');
+    const colors = [
+      'rgba(249,200,212,0.8)',
+      'rgba(232,160,176,0.7)',
+      'rgba(212,118,154,0.65)',
+      'rgba(253,232,237,0.75)',
+      'rgba(244,192,210,0.7)',
+    ];
+    for (let i = 0; i < 28; i++) {
+      const p = document.createElement('div');
+      p.className = 'fp';
+      const size = 6 + Math.random() * 10;
+      const left = Math.random() * 100;
+      const dur  = 7 + Math.random() * 10;
+      const del  = Math.random() * 12;
+      const col  = colors[Math.floor(Math.random() * colors.length)];
+      p.style.cssText = `
+        left: ${left}%;
+        width: ${size}px;
+        height: ${size * 1.2}px;
+        background: ${col};
+        animation-duration: ${dur}s;
+        animation-delay: -${del}s;
+        transform-origin: center center;
+      `;
+      layer.appendChild(p);
+    }
+  })();
+</script>
+</body>
+</html>

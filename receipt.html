@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ໃບບິນ | さくら食堂 Receipt</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <!-- html2pdf — client-side PDF generation, no server needed -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    /* ───── Base ───── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Noto Sans Lao', sans-serif;
+      background: linear-gradient(160deg, #fde8ed 0%, #fdf6f0 40%, #e8f0ed 100%);
+      min-height: 100vh;
+    }
+
+    /* ───── Falling petals ───── */
+    .petals-fixed {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .fp {
+      position: absolute; top: -30px;
+      border-radius: 80% 20% 80% 20%;
+      animation: fpFall linear infinite;
+    }
+    @keyframes fpFall {
+      0%   { opacity: 0;   transform: translateY(0)     rotate(0deg)   translateX(0); }
+      8%   { opacity: 0.7; }
+      90%  { opacity: 0.4; }
+      100% { opacity: 0;   transform: translateY(105vh) rotate(400deg) translateX(50px); }
+    }
+
+    /* ───── Page wrap ───── */
+    .page-wrap {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 36px 16px 80px;
+      gap: 20px;
+    }
+
+    /* ───── Action toolbar (outside receipt, hidden on print/PDF) ───── */
+    .toolbar {
+      width: 100%; max-width: 480px;
+      display: flex; gap: 10px;
+    }
+    .tb-btn {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 13px 10px;
+      border: none; border-radius: 12px;
+      cursor: pointer;
+      font-family: 'Noto Sans Lao', sans-serif;
+      font-size: 0.85rem; font-weight: 800;
+      letter-spacing: 0.3px;
+      transition: 0.22s cubic-bezier(0.4,0,0.2,1);
+      position: relative; overflow: hidden;
+    }
+    .tb-btn .btn-icon { font-size: 1.05rem; flex-shrink: 0; }
+    .tb-btn .btn-label { display: flex; flex-direction: column; text-align: left; }
+    .tb-btn .btn-label-main { font-size: 0.82rem; font-weight: 800; }
+    .tb-btn .btn-label-sub  { font-size: 0.6rem;  font-weight: 400; opacity: 0.75; letter-spacing: 0.3px; }
+
+    .btn-print {
+      background: linear-gradient(135deg, #1a0f14, #3d1830);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(30,10,20,0.35);
+    }
+    .btn-print:hover { background: linear-gradient(135deg, #3d1830, #c9607a); box-shadow: 0 6px 22px rgba(201,96,122,0.4); }
+
+    .btn-pdf {
+      background: linear-gradient(135deg, #c9607a, #8a2040);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(201,96,122,0.35);
+    }
+    .btn-pdf:hover { background: linear-gradient(135deg, #8a2040, #c9607a); box-shadow: 0 6px 22px rgba(201,96,122,0.5); }
+    .btn-pdf:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .btn-new {
+      background: #fff;
+      color: #c9607a;
+      border: 1.5px solid #c9607a;
+      box-shadow: 0 2px 8px rgba(201,96,122,0.12);
+    }
+    .btn-new:hover { background: #c9607a; color: #fff; }
+
+    /* Spinner inside PDF button */
+    .spinner {
+      display: none; width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-pdf.loading .spinner       { display: block; }
+    .btn-pdf.loading .btn-icon-pdf  { display: none; }
+
+    /* ───── Receipt card (this is what gets exported to PDF) ───── */
+    #receiptCard {
+      width: 100%; max-width: 480px;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 8px 40px rgba(60,30,40,0.18);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .rh {
+      background: linear-gradient(135deg, #1a0f14 0%, #3d1830 100%);
+      padding: 28px 24px 20px;
+      text-align: center;
+    }
+    .rh-jp {
+      font-size: 2rem; font-weight: 800;
+      color: #e8a0b0; letter-spacing: 6px;
+      text-shadow: 0 0 24px rgba(232,160,176,0.45);
+    }
+    .rh-en { font-size: 0.62rem; font-weight: 300; color: #f0d98a; letter-spacing: 5px; margin-top: 3px; }
+    .rh-deco { font-size: 0.82rem; color: #c8a84b; letter-spacing: 10px; margin-top: 8px; opacity: 0.6; }
+    .rh-orderno {
+      display: inline-block; margin-top: 12px;
+      background: rgba(232,160,176,0.1);
+      border: 1px solid rgba(232,160,176,0.22);
+      border-radius: 6px; padding: 4px 14px;
+      font-size: 0.7rem; color: #d4a0b0; letter-spacing: 1px;
+    }
+
+    /* Delivery tag */
+    .delivery-tag {
+      background: linear-gradient(135deg, #e67e22, #d35400);
+      color: #fff; font-size: 0.75rem; font-weight: 700;
+      padding: 6px 16px; text-align: center; letter-spacing: 1px;
+    }
+
+    /* Meta grid */
+    .meta-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      padding: 16px 18px;
+      background: rgba(253,232,237,0.18);
+      border-bottom: 1px dashed rgba(201,96,122,0.14);
+    }
+    .meta-item { display: flex; flex-direction: column; gap: 3px; }
+    .meta-label {
+      font-size: 0.56rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: #a08890;
+    }
+    .meta-value { font-size: 0.8rem; font-weight: 700; color: #1a1218; }
+
+    /* Items */
+    .items-section { padding: 0 18px 4px; }
+    .items-header {
+      display: grid; grid-template-columns: 1fr 46px 96px;
+      padding: 10px 0 6px;
+      border-bottom: 2px solid rgba(201,96,122,0.14);
+      font-size: 0.58rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; color: #a08890;
+    }
+    .col-qty   { text-align: center; }
+    .col-price { text-align: right; }
+    .item-row {
+      display: grid; grid-template-columns: 1fr 46px 96px;
+      padding: 9px 0;
+      border-bottom: 1px dashed rgba(232,160,176,0.18);
+      align-items: center;
+    }
+    .item-row:last-child { border-bottom: none; }
+    .item-row-name     { font-size: 0.78rem; font-weight: 600; color: #1a1218; }
+    .item-row-name-jp  { font-size: 0.6rem;  color: #a08890; margin-top: 1px; }
+    .item-row-qty      { text-align: center; font-size: 0.76rem; color: #7a5060; font-weight: 600; }
+    .item-row-price    { text-align: right;  font-size: 0.78rem; font-weight: 800; color: #c9607a; }
+
+    /* Totals */
+    .totals-block {
+      margin: 12px 18px 4px;
+      background: #fdf6f0;
+      border-radius: 12px; padding: 13px 15px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .t-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.76rem; color: #7a5060;
+    }
+    .t-row.grand {
+      font-size: 1.05rem; font-weight: 900; color: #1a1218;
+      border-top: 1.5px solid rgba(201,96,122,0.18);
+      padding-top: 9px; margin-top: 3px;
+    }
+    .disc-lbl, .disc-val { color: #5a7a4a; font-weight: 700; }
+
+    /* Barcode-style decorative line */
+    .barcode-strip {
+      margin: 10px 18px 0;
+      display: flex; align-items: flex-end; gap: 2px; height: 32px;
+    }
+    .bc-bar {
+      background: rgba(26,18,24,0.12);
+      border-radius: 1px;
+      flex-shrink: 0;
+    }
+
+    /* Thanks footer */
+    .thanks {
+      text-align: center; padding: 14px 24px 20px;
+      border-top: 1px dashed rgba(232,160,176,0.2);
+      color: #a08890; font-size: 0.72rem; line-height: 2;
+    }
+    .thanks .jp-line { font-size: 0.82rem; color: #e8a0b0; font-weight: 700; letter-spacing: 2px; }
+
+    /* ───── No-order placeholder ───── */
+    .no-order { text-align: center; padding: 80px 40px; color: #a08890; }
+    .no-order .icon { font-size: 3.5rem; margin-bottom: 14px; }
+    .no-order h2 { font-size: 1.1rem; font-weight: 700; color: #7a5060; }
+    .no-order p  { font-size: 0.8rem; margin-top: 6px; }
+    .no-order .back-btn {
+      display: inline-block; margin-top: 20px;
+      padding: 10px 28px; background: #c9607a; color: #fff;
+      border: none; border-radius: 8px; cursor: pointer;
+      font-family: 'Noto Sans Lao', sans-serif;
+      font-size: 0.82rem; font-weight: 700;
+    }
+
+    /* ───── PRINT STYLES ───── */
+    @media print {
+      body        { background: #fff !important; }
+      .petals-fixed, .toolbar { display: none !important; }
+      .page-wrap  { padding: 0 !important; align-items: stretch; }
+      #receiptCard {
+        max-width: 100% !important; border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+      .rh { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .delivery-tag { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .totals-block { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+
+    /* ───── Mobile ───── */
+    @media (max-width: 500px) {
+      .page-wrap { padding: 20px 12px 60px; }
+      .rh-jp { font-size: 1.6rem; }
+      .meta-grid { grid-template-columns: 1fr; gap: 8px; }
+      .toolbar { flex-wrap: wrap; }
+      .btn-new { flex: 0 0 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Animated petals -->
+<div class="petals-fixed" id="petalsFixed" aria-hidden="true"></div>
+
+<div class="page-wrap">
+
+  <!-- ── Toolbar: 3 separate buttons ── -->
+  <div class="toolbar" id="toolbar">
+    <button class="tb-btn btn-print" onclick="doPrint()">
+      <span class="btn-icon">🖨</span>
+      <span class="btn-label">
+        <span class="btn-label-main">ປ່ຣິ້ນໃບບິນ</span>
+        <span class="btn-label-sub">Print Receipt</span>
+      </span>
+    </button>
+
+    <button class="tb-btn btn-pdf" id="btnPdf" onclick="doSavePdf()">
+      <span class="spinner"></span>
+      <span class="btn-icon btn-icon-pdf">📄</span>
+      <span class="btn-label">
+        <span class="btn-label-main">ບັນທຶກ PDF</span>
+        <span class="btn-label-sub">Save as PDF</span>
+      </span>
+    </button>
+
+    <button class="tb-btn btn-new" onclick="newOrder()">
+      <span class="btn-icon">🌸</span>
+      <span class="btn-label">
+        <span class="btn-label-main">ສັ່ງໃໝ່</span>
+        <span class="btn-label-sub">New Order</span>
+      </span>
+    </button>
+  </div>
+
+  <!-- ── Receipt Card (exported to PDF) ── -->
+  <div id="receiptCard">
+    <div class="no-order">
+      <div class="icon">🌸</div>
+      <h2>ກຳລັງໂຫລດ...</h2>
+      <p>読み込み中...</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   SAKURA RECEIPT — Logic
+   ═══════════════════════════════════════ */
+
+// ── Render petals ──
+(function() {
+  const layer = document.getElementById('petalsFixed');
+  const cols = ['rgba(249,200,212,0.75)','rgba(232,160,176,0.65)','rgba(212,118,154,0.6)','rgba(253,232,237,0.7)'];
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'fp';
+    const s = 6 + Math.random() * 9;
+    p.style.cssText = `left:${Math.random()*100}%;width:${s}px;height:${s*1.2}px;background:${cols[i%4]};animation-duration:${8+Math.random()*9}s;animation-delay:-${Math.random()*12}s;`;
+    layer.appendChild(p);
+  }
+})();
+
+// ── Helpers ──
+function fmt(n) { return Number(n).toLocaleString('en-US'); }
+
+function makeBarcodeStrip() {
+  const heights = [18,28,14,24,10,30,16,22,12,26,20,14,28,18,24,10,22,16,30,14,20,12,26,18];
+  return heights.map(h => `<div class="bc-bar" style="width:${2+Math.floor(Math.random()*3)}px;height:${h}px;"></div>`).join('');
+}
+
+// ── Build receipt ──
+(function() {
+  const raw = localStorage.getItem('sakura_order');
+  const card = document.getElementById('receiptCard');
+  const toolbar = document.getElementById('toolbar');
+
+  if (!raw) {
+    card.innerHTML = `
+      <div class="no-order">
+        <div class="icon">🌸</div>
+        <h2>ບໍ່ພົບຂໍ້ມູນການສັ່ງ</h2>
+        <p>ກະລຸນາກັບໄປສັ່ງຈາກໜ້າຫຼັກ</p>
+        <button class="back-btn" onclick="window.location.href='index.html'">← ກັບໄປໜ້າຫຼັກ</button>
+      </div>`;
+    toolbar.style.display = 'none';
+    return;
+  }
+
+  const o = JSON.parse(raw);
+
+  // Item rows
+  const itemRows = o.cart.map(it => `
+    <div class="item-row">
+      <div>
+        <div class="item-row-name">${it.name}</div>
+        <div class="item-row-name-jp">${it.nameJp}</div>
+      </div>
+      <div class="item-row-qty">${it.qty}</div>
+      <div class="item-row-price">${fmt(it.price * it.qty)} ₭</div>
+    </div>`).join('');
+
+  // Totals
+  let totalsHTML = `<div class="t-row"><span>ລວມກ່ອນສ່ວນລົດ</span><span>${fmt(o.subtotal)} ₭</span></div>`;
+  if (o.discountApplied) {
+    totalsHTML += `<div class="t-row"><span class="disc-lbl">ສ່ວນລົດ 5% (LAO2024)</span><span class="disc-val">-${fmt(o.discount)} ₭</span></div>`;
+  }
+  if (o.orderType === 'delivery') {
+    totalsHTML += `<div class="t-row"><span>ຄ່າສົ່ງ Delivery</span><span>${fmt(o.delivery)} ₭</span></div>`;
+  }
+  totalsHTML += `<div class="t-row grand"><span>ຍອດລວມ 合計</span><span>${fmt(o.grand)} ₭</span></div>`;
+
+  const deliveryTag = o.orderType === 'delivery'
+    ? `<div class="delivery-tag">🛵 ສົ່ງເຮືອນ / デリバリー — ${o.deliveryAddr || '-'}</div>` : '';
+
+  const tableLabel = o.orderType === 'delivery' ? 'ປະເພດ' : 'ໂຕ໊ະ';
+  const tableValue = o.orderType === 'delivery' ? 'ສົ່ງເຮືອນ' : `ໂຕ໊ະ ${o.table}`;
+
+  card.innerHTML = `
+    <div class="rh">
+      <div class="rh-jp">さくら食堂</div>
+      <div class="rh-en">SAKURA SHOKUDŌ</div>
+      <div class="rh-deco">✦ ✿ ✦ ✿ ✦</div>
+      <div class="rh-orderno"># ${o.orderNo}</div>
+    </div>
+
+    ${deliveryTag}
+
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="meta-label">ວັນທີ / 日付</div>
+        <div class="meta-value">${o.date}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">${tableLabel}</div>
+        <div class="meta-value">${tableValue}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">ຊື່ລູກຄ້າ / お客様</div>
+        <div class="meta-value">${o.customerName}</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">ເບີໂທ / 電話</div>
+        <div class="meta-value">${o.customerPhone}</div>
+      </div>
+    </div>
+
+    <div class="items-section">
+      <div class="items-header">
+        <span>ລາຍການ / 商品</span>
+        <span class="col-qty">ຈຳນວນ</span>
+        <span class="col-price">ລາຄາ</span>
+      </div>
+      ${itemRows}
+    </div>
+
+    <div class="totals-block">${totalsHTML}</div>
+
+    <div class="barcode-strip">${makeBarcodeStrip()}</div>
+
+    <div class="thanks">
+      <div class="jp-line">ありがとうございました</div>
+      ຂອບໃຈທີ່ໃຊ້ບໍລິການ<br>
+      <strong style="color:#c9607a;">さくら食堂</strong> — Sakura Shokudō<br>
+      <span style="font-size:0.64rem;color:#c0a8b0;">またのご来店をお待ちしています 🌸</span>
+    </div>
+  `;
+})();
+
+/* ══════════════════════════════════════
+   PRINT — opens browser print dialog
+   ══════════════════════════════════════ */
+function doPrint() {
+  window.print();
+}
+
+/* ══════════════════════════════════════
+   SAVE PDF — uses html2pdf.js
+   Exports only #receiptCard, no toolbar,
+   no petals, white background.
+   ══════════════════════════════════════ */
+function doSavePdf() {
+  const btn = document.getElementById('btnPdf');
+  const card = document.getElementById('receiptCard');
+
+  // Guard: no order
+  if (!localStorage.getItem('sakura_order')) return;
+
+  // Show loading spinner
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  // Build filename from order number
+  let filename = 'sakura-receipt.pdf';
+  try {
+    const o = JSON.parse(localStorage.getItem('sakura_order'));
+    filename = `sakura-${o.orderNo}.pdf`;
+  } catch(e) {}
+
+  // html2pdf options
+  const opt = {
+    margin:       [8, 8, 8, 8],          // top right bottom left (mm)
+    filename:     filename,
+    image:        { type: 'jpeg', quality: 0.96 },
+    html2canvas:  {
+      scale: 2,                           // 2× for retina-quality text
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    },
+    jsPDF:        {
+      unit: 'mm',
+      format: 'a5',                       // A5 = standard receipt size
+      orientation: 'portrait',
+    },
+    pagebreak:    { mode: 'avoid-all' },
+  };
+
+  html2pdf()
+    .set(opt)
+    .from(card)
+    .save()
+    .then(() => {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    })
+    .catch(() => {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      alert('ມີຂໍ້ຜິດພາດໃນການສ້າງ PDF ກະລຸນາລອງໃໝ່');
+    });
+}
+
+/* ══════════════════════════════════════
+   NEW ORDER
+   ══════════════════════════════════════ */
+function newOrder() {
+  localStorage.removeItem('sakura_order');
+  if (window.opener && !window.opener.closed) {
+    window.opener.focus();
+    window.close();
+  } else {
+    window.location.href = 'index.html';
+  }
+}
+</script>
+</body>
+</html>
